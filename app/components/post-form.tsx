@@ -11,6 +11,7 @@ const PostForm: React.FC = () => {
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
   const [drafts, setDrafts] = useState<Draft[]>([]);
+  const [isPublishing, setIsPublishing] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,6 +28,51 @@ const PostForm: React.FC = () => {
 
   const handleEdit = (id: number, updatedDraft: Draft) => {
     setDrafts(drafts.map(draft => draft.id === id ? updatedDraft : draft));
+  };
+
+  const handlePublishAll = async () => {
+    setIsPublishing(true);
+    const token = process.env.NEXT_PUBLIC_GITHUB_TOKEN;
+    if (!token) {
+      alert('GitHub token is missing.');
+      setIsPublishing(false);
+      return;
+    }
+
+    const repo = 'salmansaymon57/ThemeFisher';
+    const basePath = 'contents';
+
+    for (const draft of drafts) {
+      const filePath = `${basePath}/${draft.title.replace(/ /g, '-')}.md`;
+      const content = draft.body;
+
+      try {
+        const response = await fetch(`https://api.github.com/repos/${repo}/${filePath}`, {
+          method: 'PUT',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: 'application/vnd.github+json',
+          },
+          body: JSON.stringify({
+            message: `Add ${draft.title}`,
+            content: btoa(content),
+            branch: 'main', //Repository's branch
+          }),
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`Failed to publish: ${response.status} - ${errorText}`);
+        }
+        console.log(`Published ${draft.title}`);
+      } catch (error) {
+        console.error(`Error publishing ${draft.title}:`, error);
+        alert(`Failed to publish ${draft.title}.`);
+      }
+    }
+
+    setDrafts([]);
+    setIsPublishing(false);
   };
 
   return (
@@ -64,6 +110,14 @@ const PostForm: React.FC = () => {
       </form>
 
       <DraftList drafts={drafts} onDelete={handleDelete} onEdit={handleEdit} />
+
+      <button
+        onClick={handlePublishAll}
+        disabled={isPublishing || drafts.length === 0}
+        className="mt-4 w-full py-2 px-4 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:bg-gray-400 disabled:cursor-not-allowed"
+      >
+        {isPublishing ? 'Publishing...' : 'Publish All'}
+      </button>
     </div>
   );
 };

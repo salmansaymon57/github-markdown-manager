@@ -11,7 +11,7 @@ export default function Home() {
   useEffect(() => {
     const fetchMarkdown = async () => {
       try {
-        const response = await axios.get('https://api.github.com/repos/salmansaymon57/eCommerce-NextJs/contents/README.md', {
+        const response = await axios.get('https://api.github.com/repos/salmansaymon57/ThemeFisher/contents/README.md', {
           headers: {
             Accept: 'application/vnd.github.v3.raw',
           },
