@@ -8,26 +8,11 @@ interface Draft {
 
 interface DraftListProps {
   drafts: Draft[];
-  onDelete: (id: number) => void;
-  onEdit: (id: number, updatedDraft: Draft) => void;
+  onDelete: (formData: FormData) => Promise<void>;
+  onEdit: (formData: FormData) => Promise<void>;
 }
 
 const DraftList: React.FC<DraftListProps> = ({ drafts, onDelete, onEdit }) => {
-  const [editId, setEditId] = React.useState<number | null>(null);
-  const [editTitle, setEditTitle] = React.useState('');
-  const [editBody, setEditBody] = React.useState('');
-
-  const handleEdit = (draft: Draft) => {
-    setEditId(draft.id);
-    setEditTitle(draft.title);
-    setEditBody(draft.body);
-  };
-
-  const handleSave = (id: number) => {
-    onEdit(id, { id, title: editTitle, body: editBody });
-    setEditId(null);
-  };
-
   return (
     <div className="mt-6" role="list" aria-label="List of drafts">
       <h2 className="text-lg font-semibold mb-4">Drafts</h2>
@@ -37,52 +22,46 @@ const DraftList: React.FC<DraftListProps> = ({ drafts, onDelete, onEdit }) => {
         <ul className="space-y-4">
           {drafts.map((draft) => (
             <li key={draft.id} className="p-4 border rounded-lg bg-white shadow-sm" role="listitem">
-              {editId === draft.id ? (
-                <div className="space-y-2">
-                  <input
-                    type="text"
-                    value={editTitle}
-                    onChange={(e) => setEditTitle(e.target.value)}
-                    className="w-full p-2 border rounded"
-                    aria-label={`Edit title for ${draft.title}`}
-                  />
-                  <textarea
-                    value={editBody}
-                    onChange={(e) => setEditBody(e.target.value)}
-                    className="w-full p-2 border rounded"
-                    rows={3}
-                    aria-label={`Edit body for ${draft.title}`}
-                  />
-                  <button
-                    onClick={() => handleSave(draft.id)}
-                    className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600"
-                    aria-label={`Save changes for ${draft.title}`}
-                  >
-                    Save
-                  </button>
-                </div>
-              ) : (
-                <div>
-                  <h3 className="font-medium text-gray-900">{draft.title}</h3>
-                  <p className="text-sm text-gray-600">{draft.body}</p>
-                  <div className="mt-2 space-x-2">
+              <div>
+                <h3 className="font-medium text-gray-900">{draft.title}</h3>
+                <p className="text-sm text-gray-600">{draft.body}</p>
+                <div className="mt-2 space-x-2">
+                  <form action={onEdit} className="inline-block">
+                    <input type="hidden" name="id" value={draft.id} />
+                    <input
+                      type="text"
+                      name="title"
+                      defaultValue={draft.title}
+                      className="p-1 border rounded mr-1"
+                      aria-label={`Edit title for ${draft.title}`}
+                    />
+                    <textarea
+                      name="body"
+                      defaultValue={draft.body}
+                      className="p-1 border rounded mr-1"
+                      rows={2}
+                      aria-label={`Edit body for ${draft.title}`}
+                    />
                     <button
-                      onClick={() => handleEdit(draft)}
+                      type="submit"
                       className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
-                      aria-label={`Edit ${draft.title}`}
+                      aria-label={`Save edits for ${draft.title}`}
                     >
-                      Edit
+                      Save Edit
                     </button>
+                  </form>
+                  <form action={onDelete} className="inline-block">
+                    <input type="hidden" name="id" value={draft.id} />
                     <button
-                      onClick={() => onDelete(draft.id)}
+                      type="submit"
                       className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
                       aria-label={`Delete ${draft.title}`}
                     >
                       Delete
                     </button>
-                  </div>
+                  </form>
                 </div>
-              )}
+              </div>
             </li>
           ))}
         </ul>
