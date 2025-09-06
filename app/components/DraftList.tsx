@@ -29,14 +29,14 @@ const DraftList: React.FC<DraftListProps> = ({ drafts, onDelete, onEdit }) => {
   };
 
   return (
-    <div className="mt-6">
+    <div className="mt-6" role="list" aria-label="List of drafts">
       <h2 className="text-lg font-semibold mb-4">Drafts</h2>
       {drafts.length === 0 ? (
         <p className="text-gray-500 text-center">No drafts available.</p>
       ) : (
         <ul className="space-y-4">
           {drafts.map((draft) => (
-            <li key={draft.id} className="p-4 border rounded-lg bg-white shadow-sm">
+            <li key={draft.id} className="p-4 border rounded-lg bg-white shadow-sm" role="listitem">
               {editId === draft.id ? (
                 <div className="space-y-2">
                   <input
@@ -44,16 +44,19 @@ const DraftList: React.FC<DraftListProps> = ({ drafts, onDelete, onEdit }) => {
                     value={editTitle}
                     onChange={(e) => setEditTitle(e.target.value)}
                     className="w-full p-2 border rounded"
+                    aria-label={`Edit title for ${draft.title}`}
                   />
                   <textarea
                     value={editBody}
                     onChange={(e) => setEditBody(e.target.value)}
                     className="w-full p-2 border rounded"
                     rows={3}
+                    aria-label={`Edit body for ${draft.title}`}
                   />
                   <button
                     onClick={() => handleSave(draft.id)}
                     className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600"
+                    aria-label={`Save changes for ${draft.title}`}
                   >
                     Save
                   </button>
@@ -66,12 +69,14 @@ const DraftList: React.FC<DraftListProps> = ({ drafts, onDelete, onEdit }) => {
                     <button
                       onClick={() => handleEdit(draft)}
                       className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
+                      aria-label={`Edit ${draft.title}`}
                     >
                       Edit
                     </button>
                     <button
                       onClick={() => onDelete(draft.id)}
                       className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+                      aria-label={`Delete ${draft.title}`}
                     >
                       Delete
                     </button>
