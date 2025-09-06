@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import DraftList from './DraftList';
 
 interface Draft {
   id: number;
@@ -22,6 +23,10 @@ const PostForm: React.FC = () => {
 
   const handleDelete = (id: number) => {
     setDrafts(drafts.filter(draft => draft.id !== id));
+  };
+
+  const handleEdit = (id: number, updatedDraft: Draft) => {
+    setDrafts(drafts.map(draft => draft.id === id ? updatedDraft : draft));
   };
 
   return (
@@ -58,25 +63,7 @@ const PostForm: React.FC = () => {
         </button>
       </form>
 
-      <h2 className="text-lg font-semibold mt-6 mb-4">Drafts</h2>
-      {drafts.length === 0 ? (
-        <p className="text-gray-500 text-center">No drafts available.</p>
-      ) : (
-        <ul className="space-y-2">
-          {drafts.map((draft) => (
-            <li key={draft.id} className="p-2 border rounded-md">
-              <h3 className="font-medium">{draft.title}</h3>
-              <p className="text-sm text-gray-600">{draft.body}</p>
-              <button
-                onClick={() => handleDelete(draft.id)}
-                className="mt-2 px-2 py-1 bg-red-500 text-white rounded-md hover:bg-red-600"
-              >
-                Delete
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
+      <DraftList drafts={drafts} onDelete={handleDelete} onEdit={handleEdit} />
     </div>
   );
 };
