@@ -5,7 +5,7 @@ const AnimatedGradientBackground = () => {
     <div
       className="
         absolute inset-0 -z-10 h-full w-full
-        bg-gradient-to-r from-yellow-100 via-blue-200 to-pink-500
+        bg-gradient-to-r from-yellow-100 via-blue-200 to-pink-950
         bg-[length:400%_400%]
         animate-(--animate-gradient)
       "

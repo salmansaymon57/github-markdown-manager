@@ -9,8 +9,9 @@ export default async function PostForm() {
 
 
   return (
-    <div className="max-w-2xl mt-15 mr-7 min-h-[600px] max-h-[80vh] p-4 bg-white shadow-md rounded-lg" role="region" aria-label="Post Creation and Management">
-      <h2 className="text-lg font-semibold mb-4">Create New Post</h2>
+    <div className="relative">
+    <div className="max-w-2xl mt-15 mr-7 min-h-[600px] max-h-[80vh] p-4 bg-clip-padding border-gray-200 bg-white shadow-md rounded-lg" role="region" aria-label="Post Creation and Management">
+      <h2 className="text-lg text-center font-semibold mb-4">Create New Markdown</h2>
       <form action={addDraft} className="space-y-4">
       <div>
         <label htmlFor="title" className="block text-sm font-medium text-gray-700">Title</label>
@@ -18,8 +19,9 @@ export default async function PostForm() {
         type="text"
         id="title"
         name="title"
+       
         defaultValue=""
-        className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+        className="mt-1 block w-full bg-amber-100 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
         required
         aria-required="true"
         />
@@ -30,7 +32,7 @@ export default async function PostForm() {
         id="body"
         name="body"
         defaultValue=""
-        className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+        className="mt-1 resize-none block w-full bg-amber-100 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
         rows={3}
         required
         aria-required="true"
@@ -51,12 +53,13 @@ export default async function PostForm() {
       <button
         type="submit"
         disabled={drafts.length === 0}
-        className="mt-4 w-full py-2 px-4 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:bg-gray-400 disabled:cursor-not-allowed"
+        className="mt-8 w-full py-2 px-4 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:bg-gray-400 disabled:cursor-not-allowed"
         aria-label="Publish all drafts"
       >
         Publish All
       </button>
       </form>
+    </div>
     </div>
   );
 }

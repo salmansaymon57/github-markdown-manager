@@ -1,6 +1,7 @@
-"use client"
+"use client";
 
 import React, { useState } from 'react';
+import EditModal from './EditModal';
 
 interface Draft {
   id: number;
@@ -17,28 +18,32 @@ interface DraftListProps {
 const DraftList: React.FC<DraftListProps> = ({ drafts, onDelete, onEdit }) => {
   const [editMode, setEditMode] = useState<{ [key: number]: boolean }>({});
   const [editValues, setEditValues] = useState<{ [key: number]: { title: string; body: string } }>({});
+  const [selectedDraft, setSelectedDraft] = useState<{ id: number; title: string; body: string } | null>(null);
 
   const handleEditToggle = (id: number, draft: Draft) => {
-    if (!editMode[id]) {
-      setEditValues((prev) => ({ ...prev, [id]: { title: draft.title, body: draft.body } }));
-    }
-    setEditMode((prev) => ({ ...prev, [id]: !prev[id] }));
+    setSelectedDraft(draft); // Open modal with the selected draft
   };
 
   const handleChange = (id: number, field: string, value: string) => {
-    setEditValues((prev) => ({
-      ...prev,
-      [id]: { ...prev[id], [field]: value },
-    }));
+    if (selectedDraft && selectedDraft.id === id) {
+      setEditValues((prev) => ({
+        ...prev,
+        [id]: { ...prev[id], [field]: value },
+      }));
+    }
   };
 
-  const handleSave = async (id: number) => {
+  const handleSave = async (id: number, title: string, body: string) => {
     const formData = new FormData();
     formData.set('id', id.toString());
-    formData.set('title', editValues[id].title);
-    formData.set('body', editValues[id].body);
+    formData.set('title', title);
+    formData.set('body', body);
     await onEdit(formData);
-    setEditMode((prev) => ({ ...prev, [id]: false }));
+    setSelectedDraft(null); // Close modal after save
+  };
+
+  const handleCloseModal = () => {
+    setSelectedDraft(null);
   };
 
   return (
@@ -47,56 +52,27 @@ const DraftList: React.FC<DraftListProps> = ({ drafts, onDelete, onEdit }) => {
       {drafts.length === 0 ? (
         <p className="text-gray-500 text-center">No drafts available.</p>
       ) : (
-        <ul className="space-y-4">
+        <ul className="space-y-4 flex flex-row custom-scrollbarr overflow-x-auto gap-2">
           {drafts.map((draft) => (
             <li key={draft.id} className="p-4 border rounded-lg bg-gray-50 shadow-sm hover:shadow-md transition-shadow" role="listitem">
-              <div>
-                {editMode[draft.id] ? (
-                  <div className="space-y-2">
-                    <input
-                      type="text"
-                      value={editValues[draft.id]?.title || draft.title}
-                      onChange={(e) => handleChange(draft.id, 'title', e.target.value)}
-                      className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500"
-                      aria-label={`Edit title for ${draft.title}`}
-                    />
-                    <textarea
-                      value={editValues[draft.id]?.body || draft.body}
-                      onChange={(e) => handleChange(draft.id, 'body', e.target.value)}
-                      className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500"
-                      rows={3}
-                      aria-label={`Edit body for ${draft.title}`}
-                    />
-                  </div>
-                ) : (
-                  <div className="space-y-2">
-                    <h3 className="font-medium text-gray-900">{draft.title}</h3>
-                    <p className="text-sm text-gray-600">{draft.body}</p>
-                  </div>
-                )}
+              <div className="w-32 h-25">
+                <div className="space-y-2">
+                  <h3 className="font-medium text-gray-900">{draft.title}</h3>
+                  <p className="text-sm text-gray-600">{draft.body}</p>
+                </div>
                 <div className="mt-2 space-x-2">
-                  {editMode[draft.id] ? (
-                    <button
-                      onClick={() => handleSave(draft.id)}
-                      className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors"
-                      aria-label={`Save edits for ${draft.title}`}
-                    >
-                      Save
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => handleEditToggle(draft.id, draft)}
-                      className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
-                      aria-label={`Edit ${draft.title}`}
-                    >
-                      Edit
-                    </button>
-                  )}
+                  <button
+                    onClick={() => handleEditToggle(draft.id, draft)}
+                    className="px-2 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+                    aria-label={`Edit ${draft.title}`}
+                  >
+                    Edit
+                  </button>
                   <form action={onDelete} className="inline-block">
                     <input type="hidden" name="id" value={draft.id} />
                     <button
                       type="submit"
-                      className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors"
+                      className="px-2 py-1 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors"
                       aria-label={`Delete ${draft.title}`}
                     >
                       Delete
@@ -108,6 +84,12 @@ const DraftList: React.FC<DraftListProps> = ({ drafts, onDelete, onEdit }) => {
           ))}
         </ul>
       )}
+      <EditModal
+        isOpen={!!selectedDraft}
+        onClose={handleCloseModal}
+        onSave={handleSave}
+        draft={selectedDraft}
+      />
     </div>
   );
 };
