@@ -67,7 +67,7 @@ export async function editDraft(formData: FormData) {
 export async function publishAll(formData: FormData) {
   const token = process.env.NEXT_PUBLIC_GITHUB_TOKEN;
   if (!token) {
-    throw new Error('GitHub token is missing. Please set NEXT_PUBLIC_GITHUB_TOKEN in .env.local.');
+    throw new Error('GitHub token is missing.');
   }
   const drafts = await loadDrafts();
   const repo = 'salmansaymon57/ThemeFisher';
@@ -78,6 +78,11 @@ export async function publishAll(formData: FormData) {
     revalidatePath('/');
   } catch (error) {
     console.error('Publish error:', error);
-    throw new Error(`Failed to publish: ${error.message}`);
+    let errorMessage = 'Unknown error';
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    }
+    throw new Error(`Failed to publish: ${errorMessage}`);
   }
 }
+
