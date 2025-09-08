@@ -1,8 +1,6 @@
-// actions.ts
 'use server';
 
-import fs from 'fs/promises';
-import path from 'path';
+import { kv } from '@vercel/kv';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { sanitizeInput, publishToGitHub } from '../utils';
@@ -13,22 +11,26 @@ export interface Draft {
   body: string;
 }
 
-const draftsFilePath = path.join(process.cwd(), 'data', 'drafts.json');
-const successFlagPath = path.join(process.cwd(), 'data', 'success.flag');
+const DRAFTS_KEY = 'drafts';
+const SUCCESS_FLAG_KEY = 'success_flag';
 
 export async function loadDrafts(): Promise<Draft[]> {
   try {
-    const data = await fs.readFile(draftsFilePath, 'utf-8');
-    return JSON.parse(data);
+    const data = await kv.get<string>(DRAFTS_KEY);
+    return data ? JSON.parse(data) : [];
   } catch (error) {
+    console.error('Error loading drafts from KV:', error);
     return [];
   }
 }
 
 async function saveDrafts(drafts: Draft[]) {
-  const dir = path.dirname(draftsFilePath);
-  await fs.mkdir(dir, { recursive: true });
-  await fs.writeFile(draftsFilePath, JSON.stringify(drafts, null, 2));
+  try {
+    await kv.set(DRAFTS_KEY, JSON.stringify(drafts));
+  } catch (error) {
+    console.error('Error saving drafts to KV:', error);
+    throw new Error('Failed to save drafts');
+  }
 }
 
 export async function addDraft(formData: FormData) {
@@ -82,7 +84,7 @@ export async function publishAll(formData: FormData) {
   try {
     await publishToGitHub(drafts, repoPath, basePath, token);
     await saveDrafts([]);
-    await fs.writeFile(successFlagPath, '');
+    await kv.set(SUCCESS_FLAG_KEY, '1'); // Set flag
     revalidatePath('/');
   } catch (error) {
     console.error('Publish error:', error);

@@ -5,9 +5,8 @@ import rehypeSanitize from 'rehype-sanitize';
 import PostForm from './components/post-form';
 import EditModal from './components/EditModal';
 import AnimatedGradientBackground from './components/AnimatedGradientBackground';
-import fs from 'fs/promises';
-import path from 'path';
 import { updateMarkdown, loadDrafts } from '../app/actions';
+import { kv } from '@vercel/kv';
 
 async function getMarkdownContent(username: string, repo: string, token: string, file: string) {
   if (!username || !repo || !token || !file) {
@@ -29,7 +28,7 @@ async function getMarkdownContent(username: string, repo: string, token: string,
   }
 }
 
-const successFlagPath = path.join(process.cwd(), 'data', 'success.flag');
+const SUCCESS_FLAG_KEY = 'success_flag';
 
 export default async function Page(
   props: { searchParams: Promise<{ username?: string; repo?: string; token?: string; file?: string; editDraftId?: string; cancelEdit?: string }> }
@@ -47,10 +46,13 @@ export default async function Page(
   const selectedDraft = editDraftId && !cancelEdit ? drafts.find((draft) => draft.id === editDraftId) : null;
 
   try {
-    await fs.access(successFlagPath);
-    await fs.unlink(successFlagPath);
+    const flag = await kv.get<string>(SUCCESS_FLAG_KEY);
+    if (flag) {
+      await kv.del(SUCCESS_FLAG_KEY);
+      // Optionally: Add a success message to UI here if needed
+    }
   } catch (error) {
-    // Flag doesn't exist, do nothing
+    console.error('Error handling success flag:', error);
   }
 
   return (
