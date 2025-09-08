@@ -3,72 +3,121 @@ import ReactMarkdown from 'react-markdown';
 import rehypeSanitize from 'rehype-sanitize';
 import PostForm from './components/post-form';
 import AnimatedGradientBackground from './components/AnimatedGradientBackground';
-import { revalidatePath } from 'next/cache';
+import fs from 'fs/promises';
+import path from 'path';
+import { updateMarkdown } from '../app/actions';
 
-async function getMarkdownContent(username: string, repo: string) {
-  const response = await fetch(`https://api.github.com/repos/${username}/${repo}/contents/README.md`, {
-    headers: {
-      Accept: 'application/vnd.github.v3.raw',
-      Authorization: `token ${process.env.NEXT_PUBLIC_GITHUB_TOKEN}`,
-      'User-Agent': 'Themefisher-Assessment-App'
-    },
-    cache: 'no-store'
-  });
-  if (!response.ok) throw new Error('Failed to fetch Markdown content');
-  return response.text();
-}
-
-export async function updateMarkdown(formData: FormData) {
-  'use server';
-  const username = formData.get('username') as string;
-  const repo = formData.get('repo') as string;
-  if (username && repo) {
-    revalidatePath('/');
+async function getMarkdownContent(username: string, repo: string, token: string, file: string) {
+  if (!username || !repo || !token || !file) {
+    return '# No Repository or File Specified\nPlease provide a GitHub username, repository name, personal access token, and Markdown file name.';
+  }
+  try {
+    const response = await fetch(`https://api.github.com/repos/${username}/${repo}/contents/${file}`, {
+      headers: {
+        Accept: 'application/vnd.github.v3.raw',
+        Authorization: `token ${token}`,
+        'User-Agent': 'Themefisher-Assessment-App',
+      },
+      cache: 'no-store',
+    });
+    if (!response.ok) throw new Error(`Failed to fetch Markdown content: ${response.statusText}`);
+    return await response.text();
+  } catch (error) {
+    return `# Error Fetching Markdown\n${error instanceof Error ? error.message : 'Unknown error'}`;
   }
 }
 
-export default async function Page() {
-  const defaultUsername = 'salmansaymon57';
-  const defaultRepo = 'ThemeFisher';
-  const markdownContent = await getMarkdownContent(defaultUsername, defaultRepo);
+const successFlagPath = path.join(process.cwd(), 'data', 'success.flag');
+
+export default async function Page({ searchParams }: { searchParams: { username?: string; repo?: string; token?: string; file?: string } }) {
+  const username = searchParams.username || '';
+  const repo = searchParams.repo || '';
+  const token = searchParams.token || '';
+  const file = searchParams.file || '';
+  const markdownContent = await getMarkdownContent(username, repo, token, file);
+  let showNotification = false;
+
+  try {
+    await fs.access(successFlagPath);
+    showNotification = true;
+    await fs.unlink(successFlagPath);
+  } catch (error) {
+    // Flag doesn't exist, do nothing
+  }
 
   return (
-    <div className="grid grid-cols-3 gap-x-10 gap-y-1 font-mono">
-      <AnimatedGradientBackground />
-      <div className="mt-15 ml-7 transition delay-150 col-span-2 min-h-[600px] max-h-[80vh] custom-scrollbar overflow-y-auto bg-white shadow-md rounded-md w-1.6 lg:max-w-screen mx-auto p-10" role="main" aria-label="Markdown Content and Post Management">
-        <h1 className="text-2xl animate-pulse text-center font-bold mb-4">Markdown Content</h1>
-        <form action={updateMarkdown} className="mb-6">
-          <div className="flex space-x-4">
-            <input
-              type="text"
-              name="username"
-              defaultValue={defaultUsername}
-              className="p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500"
-              placeholder="GitHub Username"
-              aria-label="GitHub username"
-            />
-            <input
-              type="text"
-              name="repo"
-              defaultValue={defaultRepo}
-              className="p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500"
-              placeholder="Repository Name"
-              aria-label="Repository name"
-            />
+    <div>
+      <div className="grid grid-cols-3 gap-x-10 gap-y-1 font-mono" role="main" aria-label="Markdown Content and Post Management">
+        <AnimatedGradientBackground />
+        <div className="mt-15 ml-7 transition delay-150 col-span-2 min-h-[600px] max-h-[80vh] custom-scrollbar overflow-y-auto bg-white/30 shadow-md rounded-md w-1.6 lg:max-w-screen mx-auto p-10">
+          <h1 className="text-2xl text-center font-bold mb-4">Fetch your GitHub repository's markdown content</h1>
+          <form action={updateMarkdown} className="mb-6 space-y-4">
+            <div>
+              <label htmlFor="username" className="block text-sm font-medium text-gray-700">GitHub Username</label>
+              <input
+                type="text"
+                id="username"
+                name="username"
+                defaultValue={username}
+                className="mt-1 block w-full bg-amber-100 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                required
+                aria-required="true"
+              />
+            </div>
+            <div>
+              <label htmlFor="repo" className="block text-sm font-medium text-gray-700">Repository Name</label>
+              <input
+                type="text"
+                id="repo"
+                name="repo"
+                defaultValue={repo}
+                className="mt-1 block w-full bg-amber-100 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                required
+                aria-required="true"
+              />
+            </div>
+            <div>
+              <label htmlFor="token" className="block text-sm font-medium text-gray-700">Personal Access Token</label>
+              <input
+                type="password"
+                id="token"
+                name="token"
+                defaultValue={token}
+                className="mt-1 block w-full bg-amber-100 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                required
+                aria-required="true"
+              />
+            </div>
+            <div>
+              <label htmlFor="file" className="block text-sm font-medium text-gray-700">Markdown File Name</label>
+              <input
+                type="text"
+                id="file"
+                name="file"
+                defaultValue={file || 'README.md'}
+                placeholder="e.g., README.md or example.md"
+                className="mt-1 block w-full bg-amber-100 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                required
+                aria-required="true"
+              />
+            </div>
             <button
               type="submit"
-              className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-              aria-label="Update Markdown content"
+              className="w-full py-2 px-4 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              aria-label="Fetch Markdown content"
             >
-              Update
+              Fetch Markdown
             </button>
+          </form>
+          <div className="prose border border-black mx-auto p-6 rounded-lg">
+            <ReactMarkdown rehypePlugins={[rehypeSanitize]}>{markdownContent}</ReactMarkdown>
           </div>
-        </form>
-        <div className="prose">
-          <ReactMarkdown rehypePlugins={[rehypeSanitize]}>{markdownContent}</ReactMarkdown>
         </div>
+        <div>
+          <PostForm githubParams={{ username, repo, token }} />
+        </div>
+        {/* {showNotification && <Notification show={true} />} */}
       </div>
-      <PostForm />
     </div>
   );
 }

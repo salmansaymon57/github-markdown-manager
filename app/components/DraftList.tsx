@@ -52,9 +52,9 @@ const DraftList: React.FC<DraftListProps> = ({ drafts, onDelete, onEdit }) => {
       {drafts.length === 0 ? (
         <p className="text-gray-500 text-center">No drafts available.</p>
       ) : (
-        <ul className="space-y-4 flex flex-row custom-scrollbarr overflow-x-auto gap-2">
+        <ul className="space-y-4 flex flex-row custom-scrollbar overflow-x-auto gap-2">
           {drafts.map((draft) => (
-            <li key={draft.id} className="p-4 border rounded-lg bg-gray-50 shadow-sm hover:shadow-md transition-shadow" role="listitem">
+            <li key={draft.id} className="p-4 border rounded-lg bg-gray-50 shadow-sm hover:shadow-md hover:bg-amber-100 transition-shadow" role="listitem">
               <div className="w-32 h-25">
                 <div className="space-y-2">
                   <h3 className="font-medium text-gray-900">{draft.title}</h3>

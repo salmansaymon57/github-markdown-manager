@@ -1,13 +1,11 @@
 import sanitizeHtml from 'sanitize-html';
 
-// Sanitize user input to prevent XSS
 export const sanitizeInput = (input: string): string => {
   return sanitizeHtml(input, {
     allowedTags: [],
     allowedAttributes: {},
   });
 };
-
 
 export const publishToGitHub = async (drafts: { id: number; title: string; body: string }[], repo: string, basePath: string, token: string) => {
   for (const draft of drafts) {
@@ -19,11 +17,12 @@ export const publishToGitHub = async (drafts: { id: number; title: string; body:
       headers: {
         Authorization: `token ${token}`,
         Accept: 'application/vnd.github.v3+json',
+        'User-Agent': 'Themefisher-Assessment-App',
       },
       body: JSON.stringify({
         message: `Add ${draft.title}`,
         content: btoa(content),
-        branch: 'main', // Adjust to your default branch
+        branch: 'main',
       }),
     });
 

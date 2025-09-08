@@ -16,27 +16,9 @@
 /* For Firefox */
 .custom-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: #ffffff #ffffff;
+  scrollbar-color: #030000 #98888895;
 }
 
-
-.custom-scrollbarr::-webkit-scrollbar {
-   display: none;
-}
-.custom-scrollbarr::-webkit-scrollbar-track {
-  background: #ffffff;
-  border-radius: 10px;
-}
-.custom-scrollbarr::-webkit-scrollbar-thumb {
-  background: #ffffff;
-  border-radius: 10px;
-  border: 2px solid #ffffff;
-}
-/* For Firefox */
-.custom-scrollbarr {
-  scrollbar-width: thin;
-  scrollbar-color: #080101 #ffffff;
-}
 
 
 :root {
