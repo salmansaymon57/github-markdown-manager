@@ -60,7 +60,7 @@ export default async function Page(
         
         
         <div className="mt-5 ml-7 transition delay-150 col-span-2 min-h-[600px] max-h-[80vh] custom-scrollbar overflow-y-auto bg-white/30 shadow-md rounded-md w-1.6 lg:max-w-screen mx-auto p-10">
-          <h1 className="text-2xl text-center font-bold mb-4">Fetch your GitHub repository's markdown content</h1>
+          <h1 className="text-2xl text-center font-bold mb-4">Fetch your GitHub repository&apos;s markdown content</h1>
           <form action={updateMarkdown} className="mb-6 space-y-4">
             <div>
               <label htmlFor="username" className="block text-sm font-medium text-gray-700">GitHub Username</label>

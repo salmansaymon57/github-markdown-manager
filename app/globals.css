@@ -33,3 +33,18 @@
     background-position: 100% 50%;
   }
 }
+
+@keyframes gradient {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@media (max-width: 768px) {
+  :root {
+    --animate-gradient: gradient 4s ease infinite; /* Faster animation on smaller screens */
+  }
+}
