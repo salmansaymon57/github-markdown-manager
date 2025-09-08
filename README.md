@@ -1,274 +1,140 @@
-# **GitHub Markdown Manager**
+# GitHub Markdown Manager
 
-A Next.js application for managing Markdown content in a GitHub
-repository. Users can fetch and render Markdown files from GitHub,
-create/edit/delete drafts stored in Redis, and publish drafts as
-Markdown files to a GitHub repository. The app features a responsive,
-accessible UI with server-side rendering and server actions for seamless
-interactivity.
+A **Next.js** application that enables streamlined management of Markdown files in a GitHub repository. It provides:
 
-## **Features**
+- Live fetching and secure rendering of Markdown from GitHub.
+- Draft creation, editing, and deletion, with persistence via Upstash Redis.
+- A one-click **Publish All** feature to commit drafts as Markdown files back to GitHub.
+- A responsive, accessible UI built with TypeScript, Tailwind CSS, and Next.js App Router.
 
-This project meets all specified requirements, as outlined in the
-checklist below:
+---
 
--   **✅ Fetches Markdown from GitHub and renders as sanitized HTML**
+## ✨ Features
 
-    -   Retrieves Markdown files from a specified GitHub repository
-        > using the GitHub API.
+- **Fetch GitHub Markdown**: Retrieve and display Markdown from a specified GitHub repo using the GitHub API, rendered securely with `react-markdown` and `rehype-sanitize` to prevent XSS attacks.  
 
-    -   Renders content securely using react-markdown with
-        > rehype-sanitize to prevent XSS attacks.
+- **Persistent Drafts**: Create, edit, delete, and list drafts via an intuitive interface. Drafts are stored in Upstash Redis for persistence across reloads and sessions.  
 
--   **✅ Drafts: create, edit, delete, list; persist across reloads**
+- **Publish All**: Publish all drafts to GitHub as Markdown files with descriptive commit messages. Once published, drafts are cleared from Redis.  
 
-    -   Create, edit, delete, and list drafts via a user-friendly
-        > interface.
+- **Secure & Configurable**: Environment variables (e.g., `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`, GitHub tokens) securely handle sensitive data without client-side exposure.  
 
-    -   Drafts are stored in Upstash Redis, ensuring persistence across
-        > page reloads and sessions.
+- **Accessible, Responsive UI**: Designed with ARIA labels and Tailwind-powered grid layouts for accessibility and mobile-friendliness.  
 
--   **✅ "Publish All" commits Markdown files to GitHub**
+- **Product-grade Performance**: Utilizes Next.js server components, server actions, and minimal hydration for fast page loads and efficient Redis usage.  
 
-    -   Publishes all drafts as Markdown files to the specified GitHub
-        > repository using the GitHub API.
+---
 
-    -   Commits are made with descriptive messages, and drafts are
-        > cleared from Redis post-publish.
+## 🛠 Tech Stack
 
--   **✅ Secrets are not exposed; environment variables are used
-    > correctly**
+- **Framework**: Next.js 15 (App Router)  
+- **Styling**: Tailwind CSS  
+- **Markdown Rendering**: `react-markdown` + `rehype-sanitize` + `sanitize-html`  
+- **Database**: Upstash Redis  
+- **Version Control**: GitHub API integration  
+- **Language**: TypeScript  
+- **Hosting/Deployment**: Vercel  
 
-    -   Sensitive data (Redis URL, token, GitHub token) are stored in
-        > environment variables (UPSTASH_REDIS_REST_URL,
-        > UPSTASH_REDIS_REST_TOKEN) or passed via forms.
+---
 
-    -   No secrets are hardcoded or exposed in client-side code.
+## 📦 Packages Used
 
--   **✅ No console errors/warnings; clean, consistent formatting**
+- **@tailwindcss/postcss** – Tailwind CSS integration with PostCSS for utility-first styling.  
+- **@upstash/redis** – Provides Redis database connectivity for storing and retrieving drafts.  
+- **axios** – Handles HTTP requests to the GitHub API.  
+- **next** – React framework used for server-side rendering, routing, and API routes.  
+- **postcss** – A CSS processing tool that powers Tailwind and modern CSS workflows.  
+- **react** – Core UI library for building interactive components.  
+- **react-dom** – React’s DOM rendering library.  
+- **react-markdown** – Parses and renders Markdown content as React components.  
+- **rehype-sanitize** – Sanitizes Markdown output to prevent unsafe HTML or scripts.  
+- **sanitize-html** – Ensures Markdown rendered from GitHub is safely converted into clean HTML.  
+- **tailwindcss** – Utility-first CSS framework for styling and responsive design.  
 
-    -   Code is free of console errors/warnings in production (verified
-        > locally and on deployment).
+---
 
-    -   Uses consistent formatting with TypeScript, Tailwind CSS, and
-        > Next.js conventions.
+## 🚀 Quick Start
 
--   **✅ Accessible, responsive UI; reasonable performance**
+### Prerequisites
 
-    -   UI includes ARIA labels for form inputs, buttons, and modals
-        > (e.g., aria-label=\"Edit draft \${draft.title}\").
+- Node.js **18+**
+- A **GitHub personal access token** with `repo` scope
+- An **Upstash Redis** instance
+- A **Vercel** account (for deployment)
 
-    -   Responsive grid layout (grid-cols-3) adapts to various screen
-        > sizes.
+### Local Setup
 
-    -   Optimized with server-side rendering, minimal client-side
-        > JavaScript, and efficient Redis queries.
+1. Clone the repo:
+   ```bash
+   git clone https://github.com/salmansaymon57/github-markdown-manager.git
+   cd github-markdown-manager
 
--   **✅ Clear README with rationale and instructions**
 
-    -   This README provides comprehensive setup, deployment, and design
-        > rationale.
 
--   **✅ Live deployment works**
+2. Install dependencies:
+   ```bash
+   npm install
 
-    -   Successfully deployed on Vercel with Upstash Redis integration,
-        > fully functional for all features.
+3. Configure environment variables in .env.local :
+   ```bash
+   UPSTASH_REDIS_REST_URL=your-upstash-url
+   UPSTASH_REDIS_REST_TOKEN=your-upstash-token
 
-## **Tech Stack**
 
--   **Framework**: Next.js 13+ (App Router) for server-side rendering
-    > and server actions.
+4. Start the development server:
+   ```bash
+   npm run dev
 
--   **Database**: Upstash Redis for storing drafts and GitHub
-    > configuration.
+5. Use the interface to:
 
--   **Styling**: Tailwind CSS for responsive, utility-first design.
+Fetch Markdown (enter GitHub details + filename)
 
--   **Markdown Rendering**: react-markdown with rehype-sanitize for
-    > secure rendering.
+Manage drafts (create, edit, delete)
 
--   **APIs**: GitHub API for fetching and publishing Markdown files.
+Publish All drafts to your  GitHub repo
 
--   **TypeScript**: For type-safe code and interfaces (e.g., Draft,
-    > GithubConfig).
+## Deployment on Vercel
+1. Push your changes to GitHub:
+   ```bash
+    git add .
+    git commit -m "Initial commit"
+    git push
 
--   **Deployment**: Vercel for hosting, with automatic scaling and
-    > environment variable management.
+2. In Vercel, create a new project and import the repository.
 
-## **Setup Instructions**
+3. Add the following environment variables in Vercel’s dashboard (for each environment: **Production**, **Preview**, **Development**):
+   - `UPSTASH_REDIS_REST_URL`
+   - `UPSTASH_REDIS_REST_TOKEN`
 
-### **Prerequisites**
+4. Deploy the project. After deployment, test features:
+   - Fetching Markdown  
+   - Draft management  
+   - Publishing to GitHub  
 
--   Node.js 18+ installed.
+---
 
--   A GitHub account with a personal access token (scope: repo).
+## 🧩 Design Rationale
 
--   An Upstash Redis account with a database instance.
+- **Server-Driven UI**: Heavy lifting via Next.js server components and actions ensures great performance and security.  
+- **Redis as a durable store**: Upstash Redis offers seamless serverless behavior with JSON-managed draft storage.  
+- **Security-first**: Sanitizing rendered Markdown and keeping tokens out of client-side code safeguards the app.  
+- **Accessibility & responsiveness**: ARIA labels and utility-first styling make the app user-friendly across devices.  
+- **Robust error handling**: Try-catch logic and fallback UI components ensure stability, even when errors occur.  
 
--   A Vercel account for deployment.
+---
 
-### **Local Development**
+## 🛠 Troubleshooting
 
-**Clone the Repository**:\
-\
-git clone https://github.com/your-username/your-repo.git
+| Issue                         | Possible Fixes |
+|-------------------------------|----------------|
+| **Redis Connection Errors**   | Verify `_URL` and `_TOKEN` env vars; check Upstash dashboard for rate limits. |
+| **GitHub API Failures**       | Confirm your token has proper `repo` scope. Verify input values for username/repo/file name. |
+| **Build/Deployment Failures** | Review Vercel logs and ensure all env vars are configured. Use `vercel env pull .env.local` to sync locally. |
+| **Drafts Not Appearing**      | Clear corrupted Redis keys and check logs (e.g., `console.log` in `actions.ts`). |
 
-cd your-repo
 
-1.  
 
-**Install Dependencies**:\
-\
-npm install
 
-2.  
 
-3.  **Set Up Environment Variables**:
 
-Create a .env.local file in the project root:\
-UPSTASH_REDIS_REST_URL=https://your-upstash-redis-url
 
-UPSTASH_REDIS_REST_TOKEN=your-upstash-redis-token
-
--   
-
--   Get the URL and token from your Upstash Redis dashboard.
-
--   Add .env.local to .gitignore to avoid committing sensitive data.
-
-**Run the Development Server**:\
-\
-npm run dev
-
-4.  -   Open http://localhost:port in your browser.
-
-5.  **Test Features**:
-
-    -   **Fetch Markdown**: Enter GitHub username, repo, token, and file
-        > name (e.g., README.md) in the form.
-
-    -   **Manage Drafts**: Create, edit, or delete drafts in the right
-        > panel.
-
-    -   **Publish All**: Publish all drafts to your GitHub repo as
-        > Markdown files.
-
-### **Deployment on Vercel**
-
-1.  **Push to Git Repository**:
-
-Ensure your code is pushed to a GitHub repository:\
-git add .
-
-git commit -m \"Initial commit\"
-
-git push origin main
-
--   
-
-2.  **Create a Vercel Project**:
-
-    -   Log in to Vercel and select **Create a New Project**.
-
-    -   Import your GitHub repository.
-
-    -   Vercel auto-detects the Next.js project and sets build commands
-        > (next build).
-
-3.  **Configure Environment Variables**:
-
-    -   In Vercel dashboard, go to **Settings** \> **Environment
-        > Variables**.
-
-    -   Add:
-
-        -   UPSTASH_REDIS_REST_URL: https://your-upstash-redis-url (no
-            > quotes).
-
-        -   UPSTASH_REDIS_REST_TOKEN: your-upstash-redis-token (no
-            > quotes).
-
-    -   Select **Production**, **Preview**, and **Development**
-        > environments, then save.
-
-4.  **Deploy**:
-
-Click **Deploy** in Vercel or use the CLI:\
-npm i -g vercel
-
-vercel \--prod
-
--   
-
--   Access the deployed app at the provided URL (e.g.,
-    > https://your-app-name.vercel.app).
-
-5.  **Verify Deployment**:
-
-    -   Test all features (fetch Markdown, manage drafts, publish) on
-        > the live URL.
-
-    -   Check Vercel logs for errors (Deployments \> select deployment
-        > \> **Logs**).
-
-## **Design Rationale**
-
--   **Server Components & Actions**: Uses Next.js App Router's server
-    > components for optimal performance (minimal client-side JS) and
-    > server actions for form submissions (addDraft, editDraft,
-    > publishAll). This ensures fast rendering and secure data handling.
-
--   **Redis for Persistence**: Upstash Redis was chosen for its
-    > simplicity, serverless compatibility with Vercel, and fast
-    > key-value storage for drafts and GitHub config.
-    > automaticDeserialization: false ensures consistent JSON handling.
-
--   **Security**:
-
-    -   sanitize-html strips HTML from user inputs to prevent XSS.
-
-    -   rehype-sanitize secures Markdown rendering.
-
-    -   GitHub tokens are passed via forms or Redis, never hardcoded.
-
--   **Accessibility**: ARIA labels and semantic HTML ensure screen
-    > reader compatibility. Tailwind's responsive utilities handle
-    > mobile and desktop layouts.
-
--   **Error Handling**: Try-catch blocks in actions.ts (e.g.,
-    > loadDrafts, publishToGitHub) and fallbacks in page.tsx (e.g.,
-    > default Markdown message) prevent crashes and provide user
-    > feedback.
-
--   **Performance**: Server-side rendering, minimal client-side
-    > hydration (only DraftList is a client component), and efficient
-    > Redis queries ensure low latency.
-
-## **Troubleshooting**
-
--   **Redis Connection Errors**:
-
-    -   Verify UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN in
-        > Vercel's dashboard (no quotes).
-
-    -   Check Upstash dashboard for rate limits or disabled instances.
-
--   **GitHub API Issues**:
-
-    -   Ensure the GitHub token has repo scope.
-
-    -   Verify username/repo/file inputs in the form.
-
--   **Build Failures**:
-
-    -   Check Vercel logs for missing dependencies or env vars.
-
-    -   Run vercel env pull .env.local to sync env vars locally.
-
--   **Drafts Not Loading**:
-
-    -   Clear Redis keys (drafts, github_config) via Upstash CLI or
-        > dashboard if corrupted.
-
-    -   Add debug logs in actions.ts (e.g., console.log(\'Raw drafts:\',
-        > data)).
