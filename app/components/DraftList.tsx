@@ -1,55 +1,44 @@
-// DraftList.tsx
+"use client";
 import React from 'react';
 import { Draft } from '../actions';
 
-interface DraftListProps {
+export interface DraftListProps {
   drafts: Draft[];
-  onDelete: (formData: FormData) => Promise<void>;
-  onEdit: (formData: FormData) => Promise<void>;
-  editDraftId?: number; // Optional prop to indicate which draft is being edited
+  editDraftId?: number;
+  onDelete: (id: number) => void;
+  onEdit: (id: number) => void;
 }
 
-const DraftList: React.FC<DraftListProps> = ({ drafts, onDelete, onEdit, editDraftId }) => {
+export default function DraftList({ drafts, editDraftId, onDelete, onEdit }: DraftListProps) {
   return (
-    <div className="mt-6" role="list" aria-label="List of drafts">
-      <h2 className="text-lg font-semibold mb-4 text-indigo-800">Drafts</h2>
+    <div className="mt-4">
+      <h3 className="text-lg font-semibold mb-2">Drafts</h3>
       {drafts.length === 0 ? (
-        <p className="text-gray-500 text-center">No drafts available.</p>
+        <p>No drafts available.</p>
       ) : (
-        <ul className="space-y-4 flex flex-row custom-scrollbar overflow-x-auto gap-2">
-          {drafts.map((draft) => (
-            <li
-              key={draft.id}
-              className="p-4 border h-30 rounded-lg bg-gray-50 shadow-sm hover:shadow-md hover:bg-amber-100 transition-shadow"
-              role="listitem"
-            >
-              <div className="w-32 h-25">
-                <div className="space-y-2">
-                  <h3 className="font-medium text-gray-900">{draft.title}</h3>
-                  <p className="text-sm text-gray-600">{draft.body}</p>
-                </div>
-                <div className="mt-2 space-x-2">
-                  <form action="/?editDraftId" method="GET" className="inline-block">
-                    <input type="hidden" name="editDraftId" value={draft.id} />
-                    <button
-                      type="submit"
-                      className="px-2 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
-                      aria-label={`Edit ${draft.title}`}
-                    >
-                      Edit
-                    </button>
-                  </form>
-                  <form action={onDelete} className="inline-block">
-                    <input type="hidden" name="id" value={draft.id} />
-                    <button
-                      type="submit"
-                      className="px-2 py-1 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors"
-                      aria-label={`Delete ${draft.title}`}
-                    >
-                      Delete
-                    </button>
-                  </form>
-                </div>
+        <ul className="space-y-2">
+          {drafts.map(draft => (
+            <li key={draft.id} className="p-2 bg-gray-100 rounded-md flex justify-between items-center">
+              <div>
+                <h4 className="font-medium">{draft.title}</h4>
+                <p className="text-sm text-gray-600">{draft.body.substring(0, 50)}...</p>
+              </div>
+              <div className="space-x-2">
+                <button
+                  onClick={() => onEdit(draft.id)}
+                  className="py-1 px-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                  disabled={editDraftId === draft.id}
+                  aria-label={`Edit draft ${draft.title}`}
+                >
+                  Edit
+                </button>
+                <button
+                  onClick={() => onDelete(draft.id)}
+                  className="py-1 px-2 bg-red-500 text-white rounded hover:bg-red-600"
+                  aria-label={`Delete draft ${draft.title}`}
+                >
+                  Delete
+                </button>
               </div>
             </li>
           ))}
@@ -57,6 +46,4 @@ const DraftList: React.FC<DraftListProps> = ({ drafts, onDelete, onEdit, editDra
       )}
     </div>
   );
-};
-
-export default DraftList;
+}

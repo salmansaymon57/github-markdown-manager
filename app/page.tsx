@@ -5,7 +5,7 @@ import PostForm from './components/post-form';
 import EditModal from './components/EditModal';
 import AnimatedGradientBackground from './components/AnimatedGradientBackground';
 import { Redis } from '@upstash/redis';
-import { updateMarkdown, loadDrafts } from '../app/actions';
+import { updateMarkdown, loadDrafts, loadGithubConfig } from '../app/actions';
 
 const redis = new Redis({
   url: process.env.UPSTASH_REDIS_REST_URL!,
@@ -33,16 +33,6 @@ async function getMarkdownContent(username: string, repo: string, token: string,
 }
 
 const SUCCESS_FLAG_KEY = 'success_flag';
-
-async function loadGithubConfig(): Promise<{ username: string; repo: string; token: string } | null> {
-  try {
-    const data = await redis.get<string>('github_config');
-    return data ? JSON.parse(data) : null;
-  } catch (error) {
-    console.error('Error loading GitHub config from Redis:', error);
-    return null;
-  }
-}
 
 export default async function Page(
   props: { searchParams: Promise<{ username?: string; repo?: string; token?: string; file?: string; editDraftId?: string; cancelEdit?: string }> }
@@ -153,7 +143,7 @@ export default async function Page(
           </div>
         </div>
         <div>
-          <PostForm githubParams={{ username, repo, token }} editDraftId={editDraftId} />
+          <PostForm githubParams={{ username, repo, token }} editDraftId={editDraftId} drafts={drafts} />
           {selectedDraft && <EditModal draft={selectedDraft} />}
         </div>
       </div>

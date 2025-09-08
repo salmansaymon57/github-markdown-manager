@@ -1,3 +1,5 @@
+'use server';
+
 import { Redis } from '@upstash/redis';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
@@ -18,6 +20,7 @@ interface GithubConfig {
 const redis = new Redis({
   url: process.env.UPSTASH_REDIS_REST_URL!,
   token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+  automaticDeserialization: false,
 });
 
 const DRAFTS_KEY = 'drafts';
@@ -36,7 +39,9 @@ export async function loadDrafts(): Promise<Draft[]> {
 
 async function saveDrafts(drafts: Draft[]) {
   try {
-    await redis.set(DRAFTS_KEY, JSON.stringify(drafts, null, 2));
+    const jsonString = JSON.stringify(drafts, null, 2);
+    console.log('Saving drafts JSON:', jsonString); // Debug log
+    await redis.set(DRAFTS_KEY, jsonString);
   } catch (error) {
     console.error('Error saving drafts to Redis:', error);
     throw new Error('Failed to save drafts');
@@ -45,16 +50,19 @@ async function saveDrafts(drafts: Draft[]) {
 
 async function saveGithubConfig(config: GithubConfig) {
   try {
-    await redis.set(GITHUB_CONFIG_KEY, JSON.stringify(config, null, 2));
+    const jsonString = JSON.stringify(config, null, 2);
+    console.log('Saving GitHub config JSON:', jsonString); // Debug log
+    await redis.set(GITHUB_CONFIG_KEY, jsonString);
   } catch (error) {
     console.error('Error saving GitHub config to Redis:', error);
     throw new Error('Failed to save GitHub config');
   }
 }
 
-async function loadGithubConfig(): Promise<GithubConfig | null> {
+export async function loadGithubConfig(): Promise<GithubConfig | null> {
   try {
     const data = await redis.get<string>(GITHUB_CONFIG_KEY);
+    console.log('Raw GitHub config from Redis:', data); // Debug log
     return data ? JSON.parse(data) : null;
   } catch (error) {
     console.error('Error loading GitHub config from Redis:', error);
