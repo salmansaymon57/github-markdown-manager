@@ -38,11 +38,10 @@ export default async function Page(
   const token = searchParams.token || '';
   const file = searchParams.file || '';
   const markdownContent = await getMarkdownContent(username, repo, token, file);
-  let showNotification = false;
+  
 
   try {
     await fs.access(successFlagPath);
-    showNotification = true;
     await fs.unlink(successFlagPath);
   } catch (error) {
     // Flag doesn't exist, do nothing
@@ -127,7 +126,7 @@ export default async function Page(
         <div>
           <PostForm githubParams={{ username, repo, token }} />
         </div>
-        {/* {showNotification && <Notification show={true} />} */}
+      
       </div>
     </div>
   );
