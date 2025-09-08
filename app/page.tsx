@@ -4,8 +4,13 @@ import rehypeSanitize from 'rehype-sanitize';
 import PostForm from './components/post-form';
 import EditModal from './components/EditModal';
 import AnimatedGradientBackground from './components/AnimatedGradientBackground';
-import { head, del } from '@vercel/blob';
+import { Redis } from '@upstash/redis';
 import { updateMarkdown, loadDrafts } from '../app/actions';
+
+const redis = new Redis({
+  url: process.env.UPSTASH_REDIS_REST_URL!,
+  token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+});
 
 async function getMarkdownContent(username: string, repo: string, token: string, file: string) {
   if (!username || !repo || !token || !file) {
@@ -27,31 +32,53 @@ async function getMarkdownContent(username: string, repo: string, token: string,
   }
 }
 
-const SUCCESS_FLAG_BLOB_NAME = 'success.flag';
+const SUCCESS_FLAG_KEY = 'success_flag';
+
+async function loadGithubConfig(): Promise<{ username: string; repo: string; token: string } | null> {
+  try {
+    const data = await redis.get<string>('github_config');
+    return data ? JSON.parse(data) : null;
+  } catch (error) {
+    console.error('Error loading GitHub config from Redis:', error);
+    return null;
+  }
+}
 
 export default async function Page(
   props: { searchParams: Promise<{ username?: string; repo?: string; token?: string; file?: string; editDraftId?: string; cancelEdit?: string }> }
 ) {
   const searchParams = await props.searchParams;
-  const username = searchParams.username || '';
-  const repo = searchParams.repo || '';
-  const token = searchParams.token || '';
-  const file = searchParams.file || '';
-  const editDraftId = searchParams.editDraftId ? Number(searchParams.editDraftId) : undefined;
-  const cancelEdit = searchParams.cancelEdit === 'true';
+  let username = searchParams.username || '';
+  let repo = searchParams.repo || '';
+  let token = searchParams.token || '';
+  let file = searchParams.file || '';
+
+  // Load from Redis if params are empty
+  if (!username || !repo || !token || !file) {
+    const config = await loadGithubConfig();
+    if (config) {
+      username = config.username;
+      repo = config.repo;
+      token = config.token;
+      file = file || 'README.md'; // Default if not provided
+    }
+  }
 
   const markdownContent = await getMarkdownContent(username, repo, token, file);
   const drafts = await loadDrafts();
+  const editDraftId = searchParams.editDraftId ? Number(searchParams.editDraftId) : undefined;
+  const cancelEdit = searchParams.cancelEdit === 'true';
+
   const selectedDraft = editDraftId && !cancelEdit ? drafts.find((draft) => draft.id === editDraftId) : null;
 
   // Check and clear success flag
   try {
-    const flagBlob = await head(SUCCESS_FLAG_BLOB_NAME, { token: process.env.BLOB_READ_WRITE_TOKEN });
-    if (flagBlob) {
-      await del(flagBlob.url, { token: process.env.BLOB_READ_WRITE_TOKEN });
+    const flag = await redis.get<string>(SUCCESS_FLAG_KEY);
+    if (flag) {
+      await redis.del(SUCCESS_FLAG_KEY);
     }
   } catch (error) {
-    console.error('Error handling success flag:', error);
+    console.error('Error handling success flag in Redis:', error);
   }
 
   return (

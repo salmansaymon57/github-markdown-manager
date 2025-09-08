@@ -1,6 +1,4 @@
-'use server';
-
-import { put, del, head } from '@vercel/blob';
+import { Redis } from '@upstash/redis';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { sanitizeInput, publishToGitHub } from '../utils';
@@ -11,29 +9,56 @@ export interface Draft {
   body: string;
 }
 
-const DRAFTS_BLOB_NAME = 'drafts.json';
-const SUCCESS_FLAG_BLOB_NAME = 'success.flag';
+interface GithubConfig {
+  username: string;
+  repo: string;
+  token: string;
+}
+
+const redis = new Redis({
+  url: process.env.UPSTASH_REDIS_REST_URL!,
+  token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+});
+
+const DRAFTS_KEY = 'drafts';
+const GITHUB_CONFIG_KEY = 'github_config';
+const SUCCESS_FLAG_KEY = 'success_flag';
 
 export async function loadDrafts(): Promise<Draft[]> {
   try {
-    const blobMetadata = await head(DRAFTS_BLOB_NAME, { token: process.env.BLOB_READ_WRITE_TOKEN });
-    if (!blobMetadata) return [];
-    const response = await fetch(blobMetadata.url);
-    if (!response.ok) throw new Error(`Failed to fetch blob content: ${response.statusText}`);
-    const data = await response.text();
-    return JSON.parse(data);
+    const data = await redis.get<string>(DRAFTS_KEY);
+    return data ? JSON.parse(data) : [];
   } catch (error) {
-    console.error('Error loading drafts from Blob:', error);
+    console.error('Error loading drafts from Redis:', error);
     return [];
   }
 }
 
 async function saveDrafts(drafts: Draft[]) {
   try {
-    await put(DRAFTS_BLOB_NAME, JSON.stringify(drafts, null, 2), { access: 'public', token: process.env.BLOB_READ_WRITE_TOKEN });
+    await redis.set(DRAFTS_KEY, JSON.stringify(drafts, null, 2));
   } catch (error) {
-    console.error('Error saving drafts to Blob:', error);
+    console.error('Error saving drafts to Redis:', error);
     throw new Error('Failed to save drafts');
+  }
+}
+
+async function saveGithubConfig(config: GithubConfig) {
+  try {
+    await redis.set(GITHUB_CONFIG_KEY, JSON.stringify(config, null, 2));
+  } catch (error) {
+    console.error('Error saving GitHub config to Redis:', error);
+    throw new Error('Failed to save GitHub config');
+  }
+}
+
+async function loadGithubConfig(): Promise<GithubConfig | null> {
+  try {
+    const data = await redis.get<string>(GITHUB_CONFIG_KEY);
+    return data ? JSON.parse(data) : null;
+  } catch (error) {
+    console.error('Error loading GitHub config from Redis:', error);
+    return null;
   }
 }
 
@@ -76,21 +101,32 @@ export async function cancelEdit() {
 }
 
 export async function publishAll(formData: FormData) {
-  const username = sanitizeInput(formData.get('username') as string || '');
-  const repo = sanitizeInput(formData.get('repo') as string || '');
-  const token = formData.get('token') as string || '';
+  let username = sanitizeInput(formData.get('username') as string || '');
+  let repo = sanitizeInput(formData.get('repo') as string || '');
+  let token = formData.get('token') as string || '';
+
+  // Load from Redis if not provided in form
   if (!username || !repo || !token) {
-    throw new Error('Missing GitHub username, repository, or token.');
+    const config = await loadGithubConfig();
+    if (config) {
+      username = config.username;
+      repo = config.repo;
+      token = config.token;
+    }
   }
+
+  if (!username || !repo || !token) {
+    throw new Error('Missing GitHub username, repository, or token. Provide in form or store in Redis.');
+  }
+
   const drafts = await loadDrafts();
   const repoPath = `${username}/${repo}`;
   const basePath = 'contents';
   try {
     await publishToGitHub(drafts, repoPath, basePath, token);
     await saveDrafts([]);
-    const { url } = await put(SUCCESS_FLAG_BLOB_NAME, '1', { access: 'public', token: process.env.BLOB_READ_WRITE_TOKEN });
+    await redis.set(SUCCESS_FLAG_KEY, '1');
     revalidatePath('/');
-    return url; // Return the URL for use in del
   } catch (error) {
     console.error('Publish error:', error);
     let errorMessage = 'Unknown error';
@@ -110,5 +146,9 @@ export async function updateMarkdown(formData: FormData) {
   if (!username || !repo || !token || !file) {
     throw new Error('Missing GitHub username, repository, token, or file name.');
   }
+
+  // Save GitHub config to Redis
+  await saveGithubConfig({ username, repo, token });
+
   redirect(`/?username=${encodeURIComponent(username)}&repo=${encodeURIComponent(repo)}&token=${encodeURIComponent(token)}&file=${encodeURIComponent(file)}`);
 }

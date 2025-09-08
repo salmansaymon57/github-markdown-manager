@@ -56,23 +56,20 @@ export default async function PostForm({ githubParams, editDraftId }: PostFormPr
         </form>
         <DraftList drafts={drafts} onDelete={deleteDraft} onEdit={editDraft} editDraftId={editDraftId} />
         <form
-          action={async (formData: FormData) => {
-            'use server';
-            formData.append('username', githubParams.username);
-            formData.append('repo', githubParams.repo);
-            formData.append('token', githubParams.token);
-            await publishAll(formData);
-          }}
-        >
-          <button
-            type="submit"
-            disabled={drafts.length === 0}
-            className="mt-8 w-full py-2 px-4 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:bg-gray-400 disabled:cursor-not-allowed"
-            aria-label="Publish all drafts"
-          >
-            Publish All
-          </button>
-        </form>
+  action={async (formData: FormData) => {
+    'use server';
+    await publishAll(formData); // No need to append githubParams; loaded from Redis
+  }}
+>
+  <button
+    type="submit"
+    disabled={drafts.length === 0}
+    className="mt-8 w-full py-2 px-4 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:bg-gray-400 disabled:cursor-not-allowed"
+    aria-label="Publish all drafts"
+  >
+    Publish All
+  </button>
+</form>
       </div>
     </div>
   );
