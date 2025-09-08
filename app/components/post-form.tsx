@@ -1,3 +1,4 @@
+// post-form.tsx
 import React from 'react';
 import DraftList from './DraftList';
 import { addDraft, deleteDraft, editDraft, publishAll, loadDrafts } from '../actions';
@@ -10,15 +11,16 @@ interface GithubParams {
 
 interface PostFormProps {
   githubParams: GithubParams;
+  editDraftId?: number;
 }
 
-export default async function PostForm({ githubParams }: PostFormProps) {
+export default async function PostForm({ githubParams, editDraftId }: PostFormProps) {
   const drafts = await loadDrafts();
 
   return (
     <div className="relative">
       <div className="max-w-2xl mt-5 mr-7 min-h-[600px] max-h-[80vh] p-4 bg-clip-padding border-gray-200 bg-white/30 shadow-md rounded-lg" role="region" aria-label="Post Creation and Management">
-        <h2 className="text-lg  text-center font-semibold mb-4">Create New Markdowns</h2>
+        <h2 className="text-lg text-center font-semibold mb-4">Create New Markdowns</h2>
         <form action={addDraft} className="space-y-4">
           <div>
             <label htmlFor="title" className="block text-sm font-medium text-gray-700">Title</label>
@@ -52,7 +54,7 @@ export default async function PostForm({ githubParams }: PostFormProps) {
             Add Draft
           </button>
         </form>
-        <DraftList  drafts={drafts} onDelete={deleteDraft} onEdit={editDraft} />
+        <DraftList drafts={drafts} onDelete={deleteDraft} onEdit={editDraft} editDraftId={editDraftId} />
         <form
           action={async (formData: FormData) => {
             'use server';

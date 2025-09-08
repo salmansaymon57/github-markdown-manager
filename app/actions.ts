@@ -1,3 +1,4 @@
+// actions.ts
 'use server';
 
 import fs from 'fs/promises';
@@ -6,7 +7,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { sanitizeInput, publishToGitHub } from '../utils';
 
-interface Draft {
+export interface Draft {
   id: number;
   title: string;
   body: string;
@@ -61,6 +62,11 @@ export async function editDraft(formData: FormData) {
     await saveDrafts(drafts);
   }
   revalidatePath('/');
+  redirect('/'); // Redirect to clear query parameters after saving
+}
+
+export async function cancelEdit() {
+  redirect('/?cancelEdit=true'); // Redirect to clear editDraftId
 }
 
 export async function publishAll(formData: FormData) {
