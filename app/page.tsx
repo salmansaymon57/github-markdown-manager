@@ -1,12 +1,11 @@
-// page.tsx
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import rehypeSanitize from 'rehype-sanitize';
 import PostForm from './components/post-form';
 import EditModal from './components/EditModal';
 import AnimatedGradientBackground from './components/AnimatedGradientBackground';
+import { head, del } from '@vercel/blob';
 import { updateMarkdown, loadDrafts } from '../app/actions';
-import { kv } from '@vercel/kv';
 
 async function getMarkdownContent(username: string, repo: string, token: string, file: string) {
   if (!username || !repo || !token || !file) {
@@ -28,7 +27,7 @@ async function getMarkdownContent(username: string, repo: string, token: string,
   }
 }
 
-const SUCCESS_FLAG_KEY = 'success_flag';
+const SUCCESS_FLAG_BLOB_NAME = 'success.flag';
 
 export default async function Page(
   props: { searchParams: Promise<{ username?: string; repo?: string; token?: string; file?: string; editDraftId?: string; cancelEdit?: string }> }
@@ -45,11 +44,11 @@ export default async function Page(
   const drafts = await loadDrafts();
   const selectedDraft = editDraftId && !cancelEdit ? drafts.find((draft) => draft.id === editDraftId) : null;
 
+  // Check and clear success flag
   try {
-    const flag = await kv.get<string>(SUCCESS_FLAG_KEY);
-    if (flag) {
-      await kv.del(SUCCESS_FLAG_KEY);
-      // Optionally: Add a success message to UI here if needed
+    const flagBlob = await head(SUCCESS_FLAG_BLOB_NAME, { token: process.env.BLOB_READ_WRITE_TOKEN });
+    if (flagBlob) {
+      await del(flagBlob.url, { token: process.env.BLOB_READ_WRITE_TOKEN });
     }
   } catch (error) {
     console.error('Error handling success flag:', error);
