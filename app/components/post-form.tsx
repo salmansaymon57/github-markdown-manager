@@ -17,8 +17,8 @@ export default async function PostForm({ githubParams }: PostFormProps) {
 
   return (
     <div className="relative">
-      <div className="max-w-2xl mt-15 mr-7 min-h-[600px] max-h-[80vh] p-4 bg-clip-padding border-gray-200 bg-white/30 shadow-md rounded-lg" role="region" aria-label="Post Creation and Management">
-        <h2 className="text-lg text-red-600 text-center font-semibold mb-4">Create New Markdowns</h2>
+      <div className="max-w-2xl mt-5 mr-7 min-h-[600px] max-h-[80vh] p-4 bg-clip-padding border-gray-200 bg-white/30 shadow-md rounded-lg" role="region" aria-label="Post Creation and Management">
+        <h2 className="text-lg  text-center font-semibold mb-4">Create New Markdowns</h2>
         <form action={addDraft} className="space-y-4">
           <div>
             <label htmlFor="title" className="block text-sm font-medium text-gray-700">Title</label>
@@ -52,7 +52,7 @@ export default async function PostForm({ githubParams }: PostFormProps) {
             Add Draft
           </button>
         </form>
-        <DraftList drafts={drafts} onDelete={deleteDraft} onEdit={editDraft} />
+        <DraftList  drafts={drafts} onDelete={deleteDraft} onEdit={editDraft} />
         <form
           action={async (formData: FormData) => {
             'use server';
