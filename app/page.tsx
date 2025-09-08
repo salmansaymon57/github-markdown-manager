@@ -29,7 +29,10 @@ async function getMarkdownContent(username: string, repo: string, token: string,
 
 const successFlagPath = path.join(process.cwd(), 'data', 'success.flag');
 
-export default async function Page({ searchParams }: { searchParams: { username?: string; repo?: string; token?: string; file?: string } }) {
+export default async function Page(
+  props: { searchParams: Promise<{ username?: string; repo?: string; token?: string; file?: string }> }
+) {
+  const searchParams = await props.searchParams;
   const username = searchParams.username || '';
   const repo = searchParams.repo || '';
   const token = searchParams.token || '';
