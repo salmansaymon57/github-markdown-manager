@@ -87,11 +87,9 @@ A **Next.js** application that enables streamlined management of Markdown files 
 
 5. Use the interface to:
 
-Fetch Markdown (enter GitHub details + filename)
-
-Manage drafts (create, edit, delete)
-
-Publish All drafts to your  GitHub repo
+- Fetch Markdown (enter GitHub details + filename)
+- Manage drafts (create, edit, delete)
+- Publish All drafts to your  GitHub repo
 
 ## Deployment on Vercel
 1. Push your changes to GitHub:
