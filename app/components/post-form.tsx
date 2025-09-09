@@ -17,7 +17,7 @@ export async function triggerEditDraft(formData: FormData) {
 
 export default function PostForm({ githubParams, editDraftId, drafts }: PostFormProps) {
   return (
-    <div className="mt-5 mr-7 p-6 bg-white/30 shadow-md rounded-md">
+    <div>
       <h2 className="text-xl font-bold mb-4">Create a New Post</h2>
       <form
         action={async (formData: FormData) => {

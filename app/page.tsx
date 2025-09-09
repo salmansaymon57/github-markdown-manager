@@ -73,12 +73,13 @@ export default async function Page(
 
   return (
     <div>
-      <AnimatedGradientBackground />
+      
       <div>
         <h1 className="text-2xl animate-pulse text-center font-bold mt-5">GITHUB-MARKDOWN-MANAGER</h1>
       </div>
-      <div className="grid grid-cols-3 gap-x-10 gap-y-1 font-mono" role="main" aria-label="Markdown Content and Post Management">
-        <div className="mt-5 ml-7 transition delay-150 col-span-2 min-h-[600px] max-h-[80vh] custom-scrollbar overflow-y-auto bg-white/30 shadow-md rounded-md w-1.6 lg:max-w-screen mx-auto p-10">
+      <AnimatedGradientBackground />
+      <div className="grid lg:grid-cols-3 md:grid-cols-1  sm:grid-cols-1 gap-x-10 gap-y-1 font-mono" role="main" aria-label="Markdown Content and Post Management">
+        <div className="mt-5 lg:ml-7 md:ml-7 sm:ml-2 lg:mr-7 md:mr-7 sm:mr-2 transition delay-150 lg:col-span-2 md:row-span-2 sm:row-span-2 min-h-[600px] max-h-[80vh] custom-scrollbar overflow-y-auto bg-white/30 shadow-md rounded-md sm:max-w-screen p-8">
           <h1 className="text-2xl text-center font-bold mb-4">Fetch your GitHub repository&apos;s markdown content</h1>
           <form action={updateMarkdown} className="mb-6 space-y-4">
             <div>
@@ -142,7 +143,7 @@ export default async function Page(
             <ReactMarkdown rehypePlugins={[rehypeSanitize]}>{markdownContent}</ReactMarkdown>
           </div>
         </div>
-        <div>
+        <div className='lg:ml-7 md:ml-7 sm:ml-2 lg:mr-7 md:mr-7 sm:mr-2 mt-5  p-6 bg-white/30 shadow-md rounded-md'>
           <PostForm githubParams={{ username, repo, token }} editDraftId={editDraftId} drafts={drafts} />
           {selectedDraft && <EditModal draft={selectedDraft} />}
         </div>
