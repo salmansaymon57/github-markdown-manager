@@ -81,11 +81,12 @@ export default function PostForm({ githubParams, editDraftId, drafts }: PostForm
           'use server';
           await import('../actions').then(({ publishAll }) => publishAll(formData));
         }}
+        className='relative'
       >
         <button
           type="submit"
           disabled={drafts.length === 0}
-          className="mt-8 w-full py-2 px-4 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:bg-gray-400 disabled:cursor-not-allowed"
+          className="absolute mt-4 w-full py-2 px-4 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:bg-gray-400 disabled:cursor-not-allowed"
           aria-label="Publish all drafts"
         >
           Publish All

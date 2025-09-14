@@ -11,12 +11,12 @@ export interface DraftListProps {
 
 export default function DraftList({ drafts, editDraftId, onDelete, onEdit }: DraftListProps) {
   return (
-    <div className="mt-4">
+    <div className="mt-4 ">
       <h3 className="text-lg font-semibold mb-2">Drafts</h3>
       {drafts.length === 0 ? (
         <p>No drafts available.</p>
       ) : (
-        <ul className="space-y-2">
+        <ul className="overflow-y-auto max-h-[150px] custom-scrollbar space-y-2">
           {drafts.map(draft => (
             <li key={draft.id} className="p-2 bg-gray-100 rounded-md flex justify-between items-center">
               <div>
